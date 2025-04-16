@@ -1,10 +1,6 @@
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import cors from 'cors';
-
-import authRouter from './routes/auth/auth-routes.js';
-
-import { stripeWebhook } from './controllers/shop/order-controller.js';
+import app from './app.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,18 +34,13 @@ app.use(
   })
 );
 
-app.use(cookieParser());
-app.use(express.json());
 
-app.use('/api/auth', authRouter);
-
-//  Stripe webhook route
-app.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
-
-const router = express.Router();
 
 app.get('/', (req, res) => {
   res.send('Hello from Express on Vercel!');
 });
 
-app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

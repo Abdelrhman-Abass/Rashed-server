@@ -14,22 +14,196 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id                    Int             @id @default(autoincrement())
-  userName              String          @unique
-  email                 String          @unique
-  password              String
-  role                  String          @default("user")
-  passwordResetCode     String?
-  passwordResetExpires  DateTime?
-  passwordResetVerified Boolean?
-  @@index([email])  // Creating index on the email field for faster lookups
 
-  // Relations
-  // addresses             Address[]
-  // orders                Order[]
-  // carts                 Cart[]
-  // reviews               ProductReview[]
+// User model with authentication support
+model User {
+  id                String               @id @default(uuid())
+  email             String              @unique
+  password          String?             // Nullable for OAuth users
+  name              String?
+  avatar            String?
+  role              Role                @default(USER)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  lastLoginAt       DateTime?
+  isActive          Boolean             @default(true)
+  
+  // Authentication fields
+  refreshToken      String?             @unique
+  emailVerified     Boolean             @default(false)
+  verificationToken String?             @unique
+  resetToken        String?             @unique
+  resetTokenExpires DateTime?
+  
+  // OAuth fields
+  googleId          String?             @unique
+  googleProfile     Json?
+  
+  // Relationships
+  profile           Profile?
+  chatSessions      ChatSession[]
+  messages          Message[]
+  reportedResponses ReportedResponse[]  @relation("ReportedByUser") // Add relation name to disambiguate
+  resolvedReports   ReportedResponse[]  @relation("ResolvedByUser") // Add relation name to disambiguate
+  createdBotResponses BotResponse[]     @relation("BotResponseCreatedBy")
+  updatedBotResponses BotResponse[]     @relation("BotResponseUpdatedBy")
+  conversationAnalytics ConversationAnalytics[]
+  
+  @@index([email])
+  @@index([googleId])
 }
 
 
+// User profile with additional information
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  bio         String?
+  preferences Json?    // Store user preferences as JSON
+  language    String   @default("en")
+  timezone    String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Chat session model to group messages
+model ChatSession {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  title       String    @default("New Chat")
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  endedAt     DateTime?
+  
+  // Relationships
+  messages    Message[]
+  analytics   ConversationAnalytics[] // Add this relation
+  
+  @@index([userId])
+}
+
+// Individual messages in a chat
+model Message {
+  id          String    @id @default(uuid())
+  sessionId   String
+  session     ChatSession @relation(fields: [sessionId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  content     String
+  isFromBot   Boolean   @default(false)
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  
+  // For rich messages
+  type        MessageType @default(TEXT)
+  metadata    Json?     // Can store additional data like attachments, etc.
+  
+  // For bot responses
+  botResponseId String?
+  botResponse BotResponse? @relation(fields: [botResponseId], references: [id])
+  
+  @@index([sessionId])
+  @@index([userId])
+  @@index([botResponseId])
+}
+
+model BotResponse {
+  id          String    @id @default(uuid())
+  trigger     String
+  response    String
+  intent      String?
+  category    String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdById String?   // Renamed for clarity
+  createdBy   User?     @relation(fields: [createdById], references: [id], name: "BotResponseCreatedBy")
+  updatedById String?   // Renamed for clarity
+  updatedBy   User?     @relation(fields: [updatedById], references: [id], name: "BotResponseUpdatedBy")
+  
+  // Relationships
+  messages    Message[]
+  reports     ReportedResponse[]
+  
+  @@index([trigger])
+  @@index([intent])
+  @@index([category])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+
+// Model for reporting inappropriate or incorrect bot responses
+model ReportedResponse {
+  id            String       @id @default(uuid())
+  responseId    String
+  response      BotResponse  @relation(fields: [responseId], references: [id])
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], name: "ReportedByUser")
+  reason        ReportReason
+  description   String?
+  status        ReportStatus @default(PENDING)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  resolvedAt    DateTime?
+  resolvedById  String?
+  resolvedBy    User?        @relation(fields: [resolvedById], references: [id], name: "ResolvedByUser")
+  
+  @@index([responseId])
+  @@index([userId])
+  @@index([status])
+  @@index([resolvedById])
+}
+// For storing conversation analytics
+model ConversationAnalytics {
+  id          String    @id @default(uuid())
+  sessionId   String
+  session     ChatSession @relation(fields: [sessionId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  duration    Int?      // Duration in seconds
+  messageCount Int      @default(0)
+  sentiment   Float?    // Average sentiment score
+  topics      String[]  // Detected topics
+  createdAt   DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([sessionId])
+}
+
+
+// Enums for type safety
+enum Role {
+  USER
+  ADMIN
+  BOT_ADMIN
+  MODERATOR
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  LOCATION
+  COMMAND
+}
+
+enum ReportReason {
+  INCORRECT
+  INAPPROPRIATE
+  OFFENSIVE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
+}
