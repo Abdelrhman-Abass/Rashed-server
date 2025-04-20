@@ -2,13 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import app from './app.js';
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 // List of allowed origins
 const allowedOrigins = [
-  'http://localhost:3000', // Local development
-  // 'https://art-market-fbss.vercel.app', // Production
-  'http://localhost:5173', // Another allowed domain
+  // 'http://localhost:3000', // Local development
+  // // 'https://art-market-fbss.vercel.app', // Production
+  // 'http://localhost:5173', // Another allowed domain
+  "*"
 ];
 
 app.use(

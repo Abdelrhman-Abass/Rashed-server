@@ -1,6 +1,6 @@
 import prisma from '../prisma/client.js';
 import { hashPassword, comparePassword } from '../utils/hash.js';
-import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
+import { generateAccessToken, generateRefreshToken , verifyRefreshToken } from '../utils/jwt.js';
 import { sendVerificationEmail, sendResetPasswordEmail } from '../utils/email.js';
 import crypto from 'crypto';
 
@@ -29,7 +29,7 @@ export const register = async (req, res, next) => {
       },
     });
 
-    await sendVerificationEmail(email, verificationToken);
+    // await sendVerificationEmail(email, verificationToken);
 
     res.status(201).json({ message: 'User registered. Please verify your email.' });
   } catch (error) {

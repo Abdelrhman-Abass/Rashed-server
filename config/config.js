@@ -17,4 +17,8 @@ export const config = {
       pass: process.env.EMAIL_PASS,
     },
   },
+  aiModel: {
+    apiUrl: process.env.AI_MODEL_API_URL || 'https://ai-model-api.com/ask',
+    apiKey: process.env.AI_MODEL_API_KEY || 'api-key',
+  },
 };
