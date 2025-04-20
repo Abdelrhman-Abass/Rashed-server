@@ -14,8 +14,8 @@ import Redis from 'redis';
 const app = express();
 
 const redisClient = Redis.createClient();
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
-await redisClient.connect();
+// redisClient.on('error', (err) => console.log('Redis Client Error', err));
+// await redisClient.connect();
 
 // Catch JSON parsing errors
 app.use((err, req, res, next) => {
