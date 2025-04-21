@@ -50,30 +50,30 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { app } from './app.js';
-import  setupSocket  from './socket/index.js';
+// import  setupSocket  from './socket/index.js';
 // import { setupSocket } from './socket/index.js';
 
 const PORT = process.env.PORT || 5000;
 
-const server = createServer(app);
+// const server = createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      '*',
-    ],
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
-  },
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: [
+//       'http://localhost:3000',
+//       'http://localhost:5173',
+//       '*',
+//     ],
+//     methods: ['GET', 'POST'],
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//     credentials: false,
+//   },
+// });
 
-export { io };
+// export { io };
 
-// Set up Socket.IO handlers
-setupSocket();
+// // Set up Socket.IO handlers
+// setupSocket();
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

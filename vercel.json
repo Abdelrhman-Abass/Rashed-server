@@ -20,14 +20,8 @@
     },
     {
       "src": "/(.*)",
-      "dest": "server.js",
-      "methods": ["GET", "POST", "DELETE", "PUT", "OPTIONS","PATCH"],
-      "headers": {
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Origin": "https://art-market-blue.vercel.app", 
-        "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-        "Access-Control-Allow-Headers": "Authorization, Content-Type"
-      }
+      "dest": "server.js"
     }
+    
   ]
 }
