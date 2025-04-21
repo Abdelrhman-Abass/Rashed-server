@@ -5,6 +5,7 @@ import {
   sendMessage,
   getMessages,
   endChatSession,
+  getChatSessions,
 } from '../controllers/messageController.js';
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.get('/:sessionId', authenticateToken, getMessages);
 
 // End a chat session
 router.patch('/session/:sessionId/end', authenticateToken, endChatSession);
+router.get('/', authenticateToken, getChatSessions); // Add this
 
 export default router;

@@ -1,9 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { fetchBotResponse } from '../utils/aiModel.js';
-import { redisClient } from '../app.js';
+// import { redisClient } from '../app.js';
 
 const prisma = new PrismaClient();
 
+// Start a new chat session
 export const startChatSession = async (req, res) => {
   const userId = req.user.id;
   const { title = 'New Chat' } = req.body;
@@ -16,7 +17,6 @@ export const startChatSession = async (req, res) => {
     },
   });
 
-  // Initialize analytics for the session
   await prisma.conversationAnalytics.create({
     data: {
       sessionId: chatSession.id,
@@ -29,6 +29,7 @@ export const startChatSession = async (req, res) => {
   res.status(201).json({ sessionId: chatSession.id, title: chatSession.title });
 };
 
+// Send a message and get AI response
 export const sendMessage = async (req, res) => {
   const { sessionId } = req.params;
   const { content, type = 'TEXT', metadata = {} } = req.body;
@@ -57,7 +58,13 @@ export const sendMessage = async (req, res) => {
   });
 
   // Call the external AI model API to get the bot's response
-  const botResponseContent = await fetchBotResponse(content);
+  let botResponseContent;
+  try {
+    botResponseContent = await fetchBotResponse(content);
+  } catch (error) {
+    console.error('Error fetching AI response:', error.message);
+    return res.status(500).json({ message: 'Failed to get AI response' });
+  }
 
   // Save the bot's response as a message
   const botMessage = await prisma.message.create({
@@ -66,7 +73,7 @@ export const sendMessage = async (req, res) => {
       userId,
       content: botResponseContent,
       isFromBot: true,
-      type: 'TEXT',
+      type: 'TEXT', // Update this if the AI API can return non-text responses
       isRead: false,
     },
   });
@@ -81,15 +88,33 @@ export const sendMessage = async (req, res) => {
       where: { id: analytics.id },
       data: {
         messageCount: { increment: 2 }, // User message + bot message
-        // Optionally compute sentiment or topics here
-        // For now, we'll leave sentiment and topics as placeholders
       },
     });
   }
 
-  // Cache the messages in Redis (optional, for faster retrieval)
-  const messages = [userMessage, botMessage];
-  await redisClient.setEx(`messages:${sessionId}`, 3600, JSON.stringify(messages));
+  // Update Redis cache with the full conversation history
+  // let allMessages = [];
+  // try {
+  //   const cachedMessages = await redisClient.get(`messages:${sessionId}`);
+  //   allMessages = cachedMessages ? JSON.parse(cachedMessages) : [];
+  //   allMessages.push(userMessage, botMessage);
+  //   await redisClient.setEx(`messages:${sessionId}`, 3600, JSON.stringify(allMessages));
+  // } catch (err) {
+  //   console.error('Failed to cache messages in Redis:', err.message);
+  //   // Fetch all messages from the database as a fallback
+  //   allMessages = await prisma.message.findMany({
+  //     where: { sessionId },
+  //     orderBy: { createdAt: 'asc' },
+  //     select: {
+  //       id: true,
+  //       content: true,
+  //       isFromBot: true,
+  //       type: true,
+  //       metadata: true,
+  //       createdAt: true,
+  //     },
+  //   });
+  // }
 
   res.status(201).json({
     userMessage: { id: userMessage.id, content: userMessage.content, createdAt: userMessage.createdAt },
@@ -97,15 +122,13 @@ export const sendMessage = async (req, res) => {
   });
 };
 
+// Retrieve all messages in a session (with pagination)
+
+
 export const getMessages = async (req, res) => {
   const { sessionId } = req.params;
   const userId = req.user.id;
-
-  // Check Redis cache first
-  const cachedMessages = await redisClient.get(`messages:${sessionId}`);
-  if (cachedMessages) {
-    return res.json(JSON.parse(cachedMessages));
-  }
+  const { page = 1, limit = 50 } = req.query;
 
   // Verify the session exists and belongs to the user
   const chatSession = await prisma.chatSession.findFirst({
@@ -116,10 +139,12 @@ export const getMessages = async (req, res) => {
     return res.status(404).json({ message: 'Chat session not found' });
   }
 
-  // Fetch all messages in the session
+  // Fetch messages from the database with pagination
   const messages = await prisma.message.findMany({
     where: { sessionId },
     orderBy: { createdAt: 'asc' },
+    skip: (page - 1) * limit,
+    take: parseInt(limit),
     select: {
       id: true,
       content: true,
@@ -130,9 +155,6 @@ export const getMessages = async (req, res) => {
     },
   });
 
-  // Cache the messages in Redis
-  await redisClient.setEx(`messages:${sessionId}`, 3600, JSON.stringify(messages));
-
   // Mark unread bot messages as read
   await prisma.message.updateMany({
     where: { sessionId, userId, isFromBot: true, isRead: false },
@@ -141,12 +163,11 @@ export const getMessages = async (req, res) => {
 
   res.json(messages);
 };
-
+// End a chat session
 export const endChatSession = async (req, res) => {
   const { sessionId } = req.params;
   const userId = req.user.id;
 
-  // Verify the session exists and belongs to the user
   const chatSession = await prisma.chatSession.findFirst({
     where: { id: sessionId, userId, isActive: true },
   });
@@ -155,7 +176,6 @@ export const endChatSession = async (req, res) => {
     return res.status(404).json({ message: 'Chat session not found or already ended' });
   }
 
-  // End the session
   const updatedSession = await prisma.chatSession.update({
     where: { id: sessionId },
     data: {
@@ -164,13 +184,12 @@ export const endChatSession = async (req, res) => {
     },
   });
 
-  // Update analytics with the session duration
   const analytics = await prisma.conversationAnalytics.findFirst({
     where: { sessionId },
   });
 
   if (analytics) {
-    const duration = Math.floor((new Date() - new Date(chatSession.createdAt)) / 1000); // Duration in seconds
+    const duration = Math.floor((new Date() - new Date(chatSession.createdAt)) / 1000);
     await prisma.conversationAnalytics.update({
       where: { id: analytics.id },
       data: { duration },
@@ -178,4 +197,26 @@ export const endChatSession = async (req, res) => {
   }
 
   res.json({ message: 'Chat session ended successfully', session: updatedSession });
+};
+// New endpoint: List all chat sessions for the user
+export const getChatSessions = async (req, res) => {
+  const userId = req.user.id;
+  const { page = 1, limit = 10 } = req.query;
+
+  const sessions = await prisma.chatSession.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    skip: (page - 1) * limit,
+    take: parseInt(limit),
+    select: {
+      id: true,
+      title: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+      endedAt: true,
+    },
+  });
+
+  res.json(sessions);
 };

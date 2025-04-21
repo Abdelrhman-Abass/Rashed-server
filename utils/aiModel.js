@@ -19,7 +19,8 @@ export const fetchBotResponse = async (userMessage) => {
     );
 
     // Assuming the API returns a response in the format { answer: "Bot's response" }
-    return response.data.answer || 'Sorry, I could not process your request.';
+    // return response.data.answer || 'Sorry, I could not process your request.';
+    return 'Sorry, I could not process your request.';
   } catch (error) {
     console.error('Error fetching bot response:', error.message);
     return 'Sorry, there was an error processing your request.';

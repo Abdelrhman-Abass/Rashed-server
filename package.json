@@ -23,6 +23,7 @@
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "helmet": "^8.1.0",
+    "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.15",
@@ -31,6 +32,7 @@
     "paypal-rest-sdk": "^1.8.1",
     "redis": "^4.7.0",
     "serverless-http": "^3.2.0",
+    "socket.io": "^4.8.1",
     "stripe": "^17.2.1"
   },
   "devDependencies": {
