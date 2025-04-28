@@ -1,5 +1,6 @@
 import { verifyAccessToken } from '../utils/jwt.js';
 import prisma from '../prisma/client.js';
+import { authenticateJWT } from "../utils/auth.js"; // Updated import
 
 export const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -25,6 +26,21 @@ export const authenticateToken = async (req, res, next) => {
     res.status(403).json({ message: 'Invalid or expired token' });
   }
 };
+
+
+export const protect = async (req, res, next) => {
+  try {
+    const user = await authenticateJWT(req);
+    req.user = user; // Attach user to the request object
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: error.message || "Unauthorized",
+    });
+  }
+};
+
 
 export const authorizeRole = (...roles) => {
   return (req, res, next) => {

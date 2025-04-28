@@ -7,6 +7,8 @@ export const generateAccessToken = (user) => {
   });
 };
 
+
+
 export const generateRefreshToken = (user) => {
   return jwt.sign({ id: user.id }, config.jwt.refreshSecret, {
     expiresIn: config.jwt.refreshTokenExpiresIn,

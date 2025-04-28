@@ -8,8 +8,48 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secre
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 
-// Password utilities
+
+
 export const hashPassword = async (password) => bcrypt.hash(password, 12);
+
+export const comparePassword = async (password, hashedPassword) => 
+  bcrypt.compare(password, hashedPassword);
+
+// Token utilities
+export const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '1d' } // Token expires in 1 day
+  );
+};
+
+export const verifyToken = (token) => jwt.verify(token, JWT_SECRET);
+
+// Authentication middleware
+export const authenticateJWT = async (req) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) throw new Error('Authorization header missing');
+
+  const token = authHeader.split(' ')[1];
+  if (!token) throw new Error('Token missing');
+
+  const decoded = verifyToken(token);
+
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.id },
+  });
+
+  if (!user) throw new Error('User not found');
+  if (!user.isActive) throw new Error('User account is inactive');
+
+  return user;
+};
+
+
+
+// Password utilities
+// export const hashPassword = async (password) => bcrypt.hash(password, 12);
 
 export const verifyPassword = async (password, hashedPassword) => bcrypt.compare(password, hashedPassword);
 
@@ -28,28 +68,30 @@ export const generateRefreshToken = (user) =>
     { expiresIn: REFRESH_TOKEN_EXPIRY }
   );
 
+
+
 export const verifyAccessToken = (token) => jwt.verify(token, JWT_SECRET);
 
 export const verifyRefreshToken = (token) => jwt.verify(token, JWT_REFRESH_SECRET);
 
 // Authentication middleware
-export const authenticateJWT = async (req) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) throw new Error('Authorization header missing');
+// export const authenticateJWT = async (req) => {
+//   const authHeader = req.headers.authorization;
+//   if (!authHeader) throw new Error('Authorization header missing');
 
-  const token = authHeader.split(' ')[1];
-  const decoded = verifyAccessToken(token);
+//   const token = authHeader.split(' ')[1];
+//   const decoded = verifyAccessToken(token);
 
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.userId },
-    include: { profile: true }
-  });
+//   const user = await prisma.user.findUnique({
+//     where: { id: decoded.userId },
+//     include: { profile: true }
+//   });
 
-  if (!user) throw new Error('User not found');
-  if (!user.isActive) throw new Error('User account is inactive');
+//   if (!user) throw new Error('User not found');
+//   if (!user.isActive) throw new Error('User account is inactive');
 
-  return user;
-};
+//   return user;
+// };
 
 // Token refresh system
 export const refreshTokens = async (refreshToken) => {

@@ -21,7 +21,6 @@ model User {
   email             String              @unique
   password          String?             // Nullable for OAuth users
   name              String?
-  avatar            String?
   role              Role                @default(USER)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -29,11 +28,7 @@ model User {
   isActive          Boolean             @default(true)
   
   // Authentication fields
-  refreshToken      String?             @unique
-  emailVerified     Boolean             @default(false)
   verificationToken String?             @unique
-  resetToken        String?             @unique
-  resetTokenExpires DateTime?
   
   // OAuth fields
   googleId          String?             @unique
