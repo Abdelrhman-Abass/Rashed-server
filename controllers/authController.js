@@ -6,6 +6,8 @@ import { sendVerificationEmail, sendResetPasswordEmail } from '../utils/email.js
 import crypto from 'crypto';
 
 // src/controllers/auth.ts (only the register function is updated)
+
+
 export const register = async (req, res, next) => {
   try {
     const { email, password, name } = req.body;
@@ -46,18 +48,14 @@ export const register = async (req, res, next) => {
       path: "/",
     });
 
-    // Uncomment to enable email verification
-    // await sendVerificationEmail(email, verificationToken);
-
     return res.status(201).json({
       success: true,
       data: {
         id: user.id,
         token,
         name: user.name,
-        email: user.email, // Added email to the response
+        email: user.email,
       },
-      message: 'User registered successfully',
     });
   } catch (error) {
     next(error);
@@ -119,7 +117,6 @@ export const login = async (req, res, next) => {
       data: {
         token,
         user: {
-          id: user.id,
           email: user.email,
           name: user.name,
         },
