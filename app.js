@@ -22,8 +22,6 @@ app.use(express.json());
 
 // CORS configuration
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
   '*', // Be cautious with '*' in production
 ];
 
