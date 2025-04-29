@@ -22,7 +22,10 @@ app.use(express.json());
 
 // CORS configuration
 const allowedOrigins = [
-  '*', // Be cautious with '*' in production
+  'http://localhost:3000', // Local development (Next.js default port)
+  'http://localhost:5173', // Another local development port (e.g., Vite)
+  'https://your-frontend.vercel.app', // Replace with your actual frontend domain
+  // Add other allowed origins as needed
 ];
 
 app.use(
