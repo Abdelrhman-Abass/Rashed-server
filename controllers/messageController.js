@@ -224,7 +224,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { fetchBotResponse } from '../utils/aiModel.js';
-import { uploadFileToStorage } from '../utils/fileStorage.js'; // Simulated file storage utility
+// import { uploadFileToStorage } from '../utils/fileStorage.js'; // Simulated file storage utility
 
 const prisma = new PrismaClient();
 
@@ -350,21 +350,21 @@ export const sendMessage = async (req, res) => {
     let messageMetadata = metadata;
 
     // Handle file upload if present
-    if (req.file) {
-      try {
-        const fileUrl = await uploadFileToStorage(req.file); // Simulated file storage utility
-        messageContent = fileUrl;
-        messageType = type === 'IMAGE' ? 'IMAGE' : 'FILE';
-        messageMetadata = { ...metadata, fileName: req.file.originalname, fileSize: req.file.size };
-      } catch (error) {
-        console.error('Error uploading file:', error.message);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to upload file',
-          data: null,
-        });
-      }
-    }
+    // if (req.file) {
+    //   try {
+    //     const fileUrl = await uploadFileToStorage(req.file); // Simulated file storage utility
+    //     messageContent = fileUrl;
+    //     messageType = type === 'IMAGE' ? 'IMAGE' : 'FILE';
+    //     messageMetadata = { ...metadata, fileName: req.file.originalname, fileSize: req.file.size };
+    //   } catch (error) {
+    //     console.error('Error uploading file:', error.message);
+    //     return res.status(500).json({
+    //       success: false,
+    //       message: 'Failed to upload file',
+    //       data: null,
+    //     });
+    //   }
+    // }
 
     // Save the user's message
     const userMessage = await prisma.message.create({
