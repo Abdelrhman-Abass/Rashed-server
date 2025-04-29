@@ -28,10 +28,10 @@ import { startChatSession, sendMessage, getMessages, endChatSession, getChatSess
 import multer from 'multer';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/' }); // Configure multer for file uploads
+// const upload = multer({ dest: 'uploads/' }); // Configure multer for file uploads
 
 router.post('/messages/session', authenticateToken, startChatSession);
-router.post('/messages/:sessionId', authenticateToken, upload.single('file'), sendMessage);
+router.post('/messages/:sessionId', authenticateToken, sendMessage);
 router.get('/messages/:sessionId', authenticateToken, getMessages);
 router.put('/messages/:sessionId/end', authenticateToken, endChatSession);
 router.get('/messages/sessions', authenticateToken, getChatSessions);
