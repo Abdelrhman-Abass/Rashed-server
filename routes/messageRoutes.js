@@ -1,5 +1,5 @@
 // import express from 'express';
-// import { authenticateToken } from '../middleware/authMiddleware.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
 // import {
 //   startChatSession,
 //   sendMessage,
@@ -24,7 +24,6 @@
 // router.get('/', authenticateToken, getChatSessions); // Add this
 
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/auth.js';
 import { startChatSession, sendMessage, getMessages, endChatSession, getChatSessions, deleteMessage } from '../controllers/messages.js';
 import multer from 'multer';
 
