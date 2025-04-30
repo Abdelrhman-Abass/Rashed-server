@@ -30,11 +30,11 @@ import multer from 'multer';
 const router = Router();
 // const upload = multer({ dest: 'uploads/' }); // Configure multer for file uploads
 
-router.post('/messages/session', authenticateToken, startChatSession);
-router.post('/messages/:sessionId', authenticateToken, sendMessage);
-router.get('/messages/:sessionId', authenticateToken, getMessages);
-router.put('/messages/:sessionId/end', authenticateToken, endChatSession);
-router.get('/messages/sessions', authenticateToken, getChatSessions);
-router.delete('/messages/:sessionId/:messageId', authenticateToken, deleteMessage);
+router.post('/session', authenticateToken, startChatSession);
+router.post('/:sessionId', authenticateToken, sendMessage);
+router.get('/:sessionId', authenticateToken, getMessages);
+router.put('/:sessionId/end', authenticateToken, endChatSession);
+router.get('/sessions', authenticateToken, getChatSessions);
+router.delete('/:sessionId/:messageId', authenticateToken, deleteMessage);
 
 export default router;
