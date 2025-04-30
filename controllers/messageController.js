@@ -280,7 +280,6 @@ export const startChatSession = async (req, res) => {
         userId,
         messageCount: 0,
         topics: [],
-        sentimentScore: 0, // Initialize sentiment score
       },
     });
 
