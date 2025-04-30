@@ -411,14 +411,12 @@ export const sendMessage = async (req, res) => {
     if (analytics) {
       // Simulated topic detection and sentiment analysis (replace with real implementation)
       const topics = [...(analytics.topics || []), 'General']; // Simulated topic
-      const sentimentScore = analytics.sentimentScore + (messageContent.includes('happy') ? 0.1 : -0.1); // Simulated sentiment
 
       await prisma.conversationAnalytics.update({
         where: { id: analytics.id },
         data: {
           messageCount: { increment: 2 }, // User message + bot message
           topics,
-          sentimentScore: Math.max(-1, Math.min(1, sentimentScore)), // Keep sentiment between -1 and 1
         },
       });
     }
