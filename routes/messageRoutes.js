@@ -34,7 +34,7 @@ router.post('/session', authenticateToken, startChatSession);
 router.post('/:sessionId', authenticateToken, sendMessage);
 router.get('/:sessionId', authenticateToken, getMessages);
 router.put('/:sessionId/end', authenticateToken, endChatSession);
-router.get('/sessions', authenticateToken, getChatSessions);
+router.get('/get-sessions', authenticateToken, getChatSessions);
 router.delete('/:sessionId/:messageId', authenticateToken, deleteMessage);
 
 export default router;

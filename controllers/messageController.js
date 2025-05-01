@@ -564,25 +564,11 @@ export const endChatSession = async (req, res) => {
 export const getChatSessions = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { page = 1, limit = 10 } = req.query;
-
-    // Validate pagination parameters
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
-    if (isNaN(pageNum) || pageNum < 1 || isNaN(limitNum) || limitNum < 1 || limitNum > 50) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid pagination parameters',
-        data: null,
-      });
-    }
 
     // Fetch sessions from the database
     const sessions = await prisma.chatSession.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      skip: (pageNum - 1) * limitNum,
-      take: limitNum,
       select: {
         id: true,
         title: true,
