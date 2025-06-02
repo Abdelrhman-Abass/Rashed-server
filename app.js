@@ -80,11 +80,11 @@ app.use(passport.session());
 
 // CORS configuration
 const allowedOrigins = [
+  'https://rashed-five.vercel.app/', // Replace with your actual frontend domain
   'http://localhost:3000', // Local development (Next.js default port)
   'http://localhost:5173', // Another local development port (e.g., Vite)
   'http://localhost:5000', // Another local development port (e.g., Vite)
 
-  'https://rashed-five.vercel.app/', // Replace with your actual frontend domain
   // Add other allowed origins as needed
 ];
 
