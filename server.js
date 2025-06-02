@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 5000;
 // List of allowed origins
 const allowedOrigins = [
   'http://localhost:3000', // Local development
-  // // 'https://art-market-fbss.vercel.app', // Production
+  'https://rashed-five.vercel.app/', // Production
   'http://localhost:5173', // Another allowed domain
   "*"
 ];

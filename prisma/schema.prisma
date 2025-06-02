@@ -18,7 +18,7 @@ datasource db {
 // User model with authentication support
 model User {
   id                String               @id @default(uuid())
-  email             String              @unique
+  email             String               @unique
   password          String?             // Nullable for OAuth users
   name              String?
   role              Role                @default(USER)
@@ -29,17 +29,20 @@ model User {
   
   // Authentication fields
   verificationToken String?             @unique
+  emailVerified     Boolean             @default(false)
+  resetToken        String?             @unique
+  resetTokenExpires DateTime?
   
   // OAuth fields
   googleId          String?             @unique
-  googleProfile     Json?
+  googleProfile     Json?               // Optional, remove if not needed
   
   // Relationships
   profile           Profile?
   chatSessions      ChatSession[]
   messages          Message[]
-  reportedResponses ReportedResponse[]  @relation("ReportedByUser") // Add relation name to disambiguate
-  resolvedReports   ReportedResponse[]  @relation("ResolvedByUser") // Add relation name to disambiguate
+  reportedResponses ReportedResponse[]  @relation("ReportedByUser")
+  resolvedReports   ReportedResponse[]  @relation("ResolvedByUser")
   createdBotResponses BotResponse[]     @relation("BotResponseCreatedBy")
   updatedBotResponses BotResponse[]     @relation("BotResponseUpdatedBy")
   conversationAnalytics ConversationAnalytics[]

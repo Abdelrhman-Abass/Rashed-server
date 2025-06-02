@@ -4,7 +4,7 @@ import prisma from '../prisma/client.js';
 import { hashPassword , comparePassword , generateToken } from '../utils/auth.js';
 import { sendVerificationEmail, sendResetPasswordEmail } from '../utils/email.js';
 import crypto from 'crypto';
-
+import passport from 'passport';
 // src/controllers/auth.ts (only the register function is updated)
 
 
@@ -268,4 +268,54 @@ export const logout = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const googleAuthCallback = async (req, res, next) => {
+  passport.authenticate('google', { session: false }, { failureRedirect: '/auth/login' }, (err, userObj) => {
+    if (err || !userObj) {
+      return res.status(401).json({
+        success: false,
+        message: 'Google authentication failed',
+      });
+    }
+
+    // Log the user in by setting the session
+    req.login(userObj, async (loginErr) => {
+      if (loginErr) {
+        return next(loginErr);
+      }
+
+      try {
+        // Update last login
+        await prisma.user.update({
+          where: { id: userObj.user.id },
+          data: { lastLoginAt: new Date() },
+        });
+
+        // Set JWT token in cookie
+        res.cookie('token', userObj.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
+          path: '/',
+        });
+
+        console.log(userObj.user)
+        return res.status(200).json({
+          success: true,
+          data: {
+            token: userObj.token,
+            user: {
+              email: userObj.user.email,
+              name: userObj.user.name,
+              token: userObj.user.token,
+            },
+          },
+          message: 'Google authentication successful',
+        });
+      } catch (error) {
+        next(error);
+      }
+    });
+  })(req, res, next);
 };

@@ -365,6 +365,11 @@ export const sendMessage = async (req, res) => {
     //   }
     // }
 
+    const messageCount = await prisma.message.count({
+      where: { sessionId },
+    });
+
+    
     // Save the user's message
     const userMessage = await prisma.message.create({
       data: {
@@ -377,6 +382,14 @@ export const sendMessage = async (req, res) => {
         isRead: true,
       },
     });
+
+    if (messageCount === 0 && messageContent && messageType === 'TEXT') {
+      const newTitle = messageContent.trim().slice(0, 50) || 'Untitled Chat';
+      await prisma.chatSession.update({
+        where: { id: sessionId },
+        data: { title: newTitle },
+      });
+    }
 
     // Call the external AI model API to get the bot's response
     let botResponseContent;
@@ -564,6 +577,7 @@ export const endChatSession = async (req, res) => {
 export const getChatSessions = async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log('User ID:', userId); // Debugging line  
 
     // Fetch sessions from the database
     const sessions = await prisma.chatSession.findMany({
@@ -593,6 +607,38 @@ export const getChatSessions = async (req, res) => {
     });
   }
 };
+export const getChatSessionInfo = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // console.log('User ID:', userId); // Debugging line  
+    const { sessionId } = req.params;
+
+    const chatSession = await prisma.chatSession.findFirst({
+      where: { id: sessionId, userId},
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+        endedAt: true,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Chat sessions retrieved successfully',
+      data: chatSession,
+    });
+  } catch (error) {
+    console.error('Error fetching chat sessions:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      data: null,
+    });
+  }
+};
+
 
 // Delete a specific message
 export const deleteMessage = async (req, res) => {
@@ -652,6 +698,110 @@ export const deleteMessage = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting message:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      data: null,
+    });
+  }
+};
+
+// Delete a chat session
+export const deleteChatSession = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const userId = req.user.id;
+
+    // Verify the session exists and belongs to the user
+    const chatSession = await prisma.chatSession.findFirst({
+      where: { id: sessionId, userId },
+    });
+
+    if (!chatSession) {
+      return res.status(404).json({
+        success: false,
+        message: 'Chat session not found',
+        data: null,
+      });
+    }
+
+    // Delete associated messages
+    await prisma.message.deleteMany({
+      where: { sessionId },
+    });
+
+    // Delete associated conversation analytics
+    await prisma.conversationAnalytics.deleteMany({
+      where: { sessionId },
+    });
+
+    // Delete the chat session
+    await prisma.chatSession.delete({
+      where: { id: sessionId },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Chat session deleted successfully',
+      data: null,
+    });
+  } catch (error) {
+    console.error('Error deleting chat session:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      data: null,
+    });
+  }
+};
+
+
+// Rename a chat session
+export const renameChatSession = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { title } = req.body;
+    const userId = req.user.id;
+
+    // Validate input
+    if (!title || typeof title !== 'string' || title.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title must be a string with max length of 100 characters',
+        data: null,
+      });
+    }
+
+    // Verify the session exists and belongs to the user
+    const chatSession = await prisma.chatSession.findFirst({
+      where: { id: sessionId, userId },
+    });
+
+    if (!chatSession) {
+      return res.status(404).json({
+        success: false,
+        message: 'Chat session not found',
+        data: null,
+      });
+    }
+
+    // Update the chat session title
+    const updatedSession = await prisma.chatSession.update({
+      where: { id: sessionId },
+      data: { title: title.trim() },
+      select: {
+        id: true,
+        title: true,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Chat session renamed successfully',
+      data: { sessionId: updatedSession.id, title: updatedSession.title },
+    });
+  } catch (error) {
+    console.error('Error renaming chat session:', error.message);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
