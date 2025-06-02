@@ -23,6 +23,17 @@
       "dest": "server.js",
       "methods": ["GET", "POST", "DELETE", "PUT", "OPTIONS","PATCH"],
       "headers": {
+        "Access-Control-Allow-Origin": "https://rashed-five.vercel.app",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization,Cache-Control,Expires,Pragma",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js",
+      "methods": ["GET", "POST", "DELETE", "PUT", "OPTIONS","PATCH"],
+      "headers": {
         "Access-Control-Allow-Credentials": "true", 
         "Access-Control-Allow-Origin": "https://rashed-five.vercel.app/", 
         "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
