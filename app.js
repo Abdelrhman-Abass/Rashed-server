@@ -55,15 +55,14 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 // Serve Swagger UI with custom static file paths
 app.use(
   '/api-docs',
-  swaggerUi.serveFiles(swaggerDocs, {
-    swaggerOptions: {},
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocs, {
     customCssUrl: 'https://unpkg.com/swagger-ui-dist@5/swagger-ui.css',
     customJs: [
       'https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js',
       'https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js',
     ],
-  }),
-  swaggerUi.setup(swaggerDocs)
+  })
 );
 
 // Expose Swagger JSON for debugging
