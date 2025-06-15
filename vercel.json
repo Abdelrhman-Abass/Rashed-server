@@ -30,9 +30,22 @@
         "Access-Control-Allow-Headers": "Authorization, Content-Type"
       }
     },
+    
+    {
+      "src": "/swagger-ui-dist/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api-docs/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/swagger.json",
+      "dest": "/index.js"
+    },
     {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "/index.js"
     }
     
   ]

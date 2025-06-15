@@ -31,14 +31,8 @@ const swaggerOptions = {
       description: 'API documentation for your Express application',
     },
     servers: [
-      {
-        url: 'http://localhost:5000',
-        description: 'Local server',
-      },
-      {
-        url: 'https://rashed-server.vercel.app/', // Replace with your production URL
-        description: 'Production server',
-      },
+      { url: 'http://localhost:5000', description: 'Local server' },
+      { url: 'https://rashed-server.vercel.app', description: 'Production server' },
     ],
     components: {
       securitySchemes: {
@@ -50,14 +44,32 @@ const swaggerOptions = {
       },
     },
   },
-  apis: ['./routes/*.js'], // Look for JSDoc comments in all route files
+  apis: ['./routes/*.js'],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
-// Serve Swagger UI at /api-docs
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// Serve Swagger UI static files explicitly
+// app.use('/swagger-ui-dist', express.static(path.join(__dirname, 'node_modules', 'swagger-ui-dist')));
 
+// Serve Swagger UI with custom static file paths
+app.use(
+  '/api-docs',
+  swaggerUi.serveFiles(swaggerDocs, {
+    swaggerOptions: {},
+    customCssUrl: 'https://unpkg.com/swagger-ui-dist@5/swagger-ui.css',
+    customJs: [
+      'https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js',
+      'https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js',
+    ],
+  }),
+  swaggerUi.setup(swaggerDocs)
+);
+
+// Expose Swagger JSON for debugging
+app.get('/swagger.json', (req, res) => {
+  res.json(swaggerDocs);
+});
 
 // Middleware
 app.use(cookieParser());

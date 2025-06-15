@@ -29,7 +29,7 @@ model User {
   
   // Authentication fields
   verificationToken String?             @unique
-  emailVerified     Boolean             @default(false)
+  emailVerified     Boolean?             @default(false)
   resetToken        String?             @unique
   resetTokenExpires DateTime?
   
