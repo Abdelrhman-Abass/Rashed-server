@@ -93,6 +93,7 @@ app.use(passport.session());
 const allowedOrigins = [
   'https://rashed-five.vercel.app', // Replace with your actual frontend domain
   'https://rashed-five.vercel.app/', // Replace with your actual frontend domain
+  'https://rashed-server.vercel.app/',
   'http://localhost:3000', // Local development (Next.js default port)
   'http://localhost:5173', // Another local development port (e.g., Vite)
   'http://localhost:5000', // Another local development port (e.g., Vite)
