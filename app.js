@@ -31,7 +31,7 @@ const swaggerOptions = {
       description: 'API documentation for your Express application',
     },
     servers: [
-      { url: 'http://localhost:5000', description: 'Local server' },
+      // { url: 'http://localhost:5000', description: 'Local server' },
       { url: 'https://rashed-server.vercel.app', description: 'Production server' },
     ],
     components: {
