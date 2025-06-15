@@ -36,8 +36,15 @@
       "dest": "/index.js"
     },
     {
-      "src": "/api-docs/(.*)",
-      "dest": "/index.js"
+      "src": "/(.*)",
+      "dest": "server.js",
+      "methods": ["GET", "POST", "DELETE", "PUT", "OPTIONS","PATCH"],
+      "headers": {
+        "Access-Control-Allow-Credentials": "true", 
+        "Access-Control-Allow-Origin": "https://rashed-five.vercel.app/api-docs", 
+        "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+        "Access-Control-Allow-Headers": "Authorization, Content-Type"
+      }
     },
     {
       "src": "/swagger.json",

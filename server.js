@@ -13,6 +13,16 @@ const allowedOrigins = [
 
 app.use(
   cors({
+    origin: '*', // Allow all origins for testing
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 204,
+  })
+);
+
+app.use(
+  cors({
     origin: (origin, callback) => {
       // If the origin is in the list of allowed origins or no origin (like in Postman requests), allow it
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
