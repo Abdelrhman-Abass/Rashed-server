@@ -265,6 +265,7 @@ export const startChatSession = async (req, res) => {
         data: null,
       });
     }
+    
 
     const chatSession = await prisma.chatSession.create({
       data: {
@@ -313,10 +314,11 @@ export const sendMessage = async (req, res) => {
         data: null,
       });
     }
-    if (!['TEXT', 'IMAGE', 'FILE'].includes(type)) {
+    const validMessageTypes = ['TEXT', 'IMAGE', 'VIDEO', 'FILE', 'AUDIO', 'DOCUMENT', 'LOCATION', 'COMMAND'];
+    if (!validMessageTypes.includes(type)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid message type. Must be TEXT, IMAGE, or FILE',
+        message: `Invalid message type. Must be one of: ${validMessageTypes.join(', ')}`,
         data: null,
       });
     }
@@ -383,7 +385,7 @@ export const sendMessage = async (req, res) => {
       },
     });
 
-    if (messageCount === 0 && messageContent && messageType === 'TEXT') {
+    if (messageCount === 0 && messageContent ) {
       const newTitle = messageContent.trim().slice(0, 50) || 'Untitled Chat';
       await prisma.chatSession.update({
         where: { id: sessionId },

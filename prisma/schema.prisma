@@ -186,6 +186,7 @@ enum MessageType {
   TEXT
   IMAGE
   VIDEO
+  FILE
   AUDIO
   DOCUMENT
   LOCATION
