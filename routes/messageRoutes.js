@@ -120,10 +120,15 @@ router.post('/session', authenticateToken, startChatSession);
  *             type: object
  *             required:
  *               - content
+ *               - messageReturn  
  *             properties:
  *               content:
  *                 type: string
  *                 example: Hello, how can you help me?
+ *                 description: Message content
+ *               messageReturn:
+ *                 type: boolean
+ *                 example: false
  *                 description: Message content
  *               type:
  *                 type: string

@@ -302,7 +302,7 @@ export const startChatSession = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { content, type = 'TEXT', metadata = {} } = req.body;
+    const { content, type = 'TEXT', metadata = {} , messageReturn = false } = req.body;
     const userId = req.user.id;
 
     // Validate inputs
@@ -437,10 +437,14 @@ export const sendMessage = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Message sent successfully',
-      data: {
-        userMessage: { id: userMessage.id, content: userMessage.content, createdAt: userMessage.createdAt },
-        botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt },
-      },
+      data: messageReturn 
+      ? {
+          userMessage: { id: userMessage.id, content: userMessage.content, createdAt: userMessage.createdAt },
+          botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt }
+        }
+      : {
+          botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt }
+        }
     });
   } catch (error) {
     console.error('Error sending message:', error.message);
