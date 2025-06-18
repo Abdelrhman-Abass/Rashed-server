@@ -130,6 +130,10 @@ router.post('/session', authenticateToken, startChatSession);
  *                 type: boolean
  *                 example: false
  *                 description: Message content
+ *               fileName:
+ *                 type: string
+ *                 example: file name
+ *                 description: file name
  *               type:
  *                 type: string
  *                 enum: [TEXT, IMAGE, FILE]

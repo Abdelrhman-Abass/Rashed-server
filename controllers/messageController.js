@@ -302,7 +302,7 @@ export const startChatSession = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { content, type = 'TEXT', metadata = {} , messageReturn = true } = req.body;
+    const { content, type = 'TEXT', metadata = {}, messageReturn = true, fileName } = req.body;
     const userId = req.user.id;
 
     // Validate inputs
@@ -438,13 +438,15 @@ export const sendMessage = async (req, res) => {
       success: true,
       message: 'Message sent successfully',
       data: messageReturn 
-      ? {
-          userMessage: { id: userMessage.id, content: userMessage.content, createdAt: userMessage.createdAt },
-          botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt }
-        }
-      : {
-          botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt }
-        }
+        ? {
+            userMessage: { id: userMessage.id, content: userMessage.content, createdAt: userMessage.createdAt },
+            botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt },
+            ...(fileName !== undefined ? { fileName } : {})
+          }
+        : {
+            botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt },
+            ...(fileName !== undefined ? { fileName } : {})
+          }
     });
   } catch (error) {
     console.error('Error sending message:', error.message);
