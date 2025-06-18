@@ -302,7 +302,7 @@ export const startChatSession = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { content, type = 'TEXT', metadata = {} , messageReturn = false } = req.body;
+    const { content, type = 'TEXT', metadata = {} , messageReturn = true } = req.body;
     const userId = req.user.id;
 
     // Validate inputs
