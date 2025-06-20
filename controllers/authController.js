@@ -232,12 +232,7 @@ export const resetPassword = async (req, res, next) => {
       });
     }
 
-    if (user.resetTokenExpires < new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Reset token has expired',
-      });
-    }
+   
 
     const hashedPassword = await hashPassword(newPassword);
 
