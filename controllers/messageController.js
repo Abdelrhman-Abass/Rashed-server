@@ -423,6 +423,7 @@ export const sendMessage = async (req, res) => {
         content: botResponseContent,
         isFromBot: true,
         type: 'TEXT', // Update this if the AI API can return non-text responses
+        fileName:fileName,
         isRead: false,
       }:{
         sessionId,
@@ -430,7 +431,6 @@ export const sendMessage = async (req, res) => {
         content: botResponseContent,
         isFromBot: true,
         type: 'TEXT', // Update this if the AI API can return non-text responses
-        fileName:fileName,
         isRead: false,
       },
     });
