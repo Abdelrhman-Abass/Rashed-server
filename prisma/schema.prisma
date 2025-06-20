@@ -95,6 +95,7 @@ model Message {
   isFromBot   Boolean   @default(false)
   isRead      Boolean   @default(false)
   createdAt   DateTime  @default(now())
+  fileName    String?
   
   // For rich messages
   type        MessageType @default(TEXT)

@@ -273,12 +273,17 @@ router.post('/forgot-password', forgotPassword);
  *           schema:
  *             type: object
  *             required:
- *               - token
+ *               - email
+ *               - oldPassword
  *               - newPassword
  *             properties:
- *               token:
+ *               email:
  *                 type: string
- *                 example: abc123
+ *                 example: "user@example.com"
+ *               oldPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: NewPassword123
  *               newPassword:
  *                 type: string
  *                 format: password

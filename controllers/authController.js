@@ -207,20 +207,28 @@ export const forgotPassword = async (req, res, next) => {
 
 export const resetPassword = async (req, res, next) => {
   try {
-    const { token, newPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
 
-    if (!token || !newPassword) {
+    if (!newPassword, !email, !oldPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Token and new password are required',
+        message: 'old password and new password are required',
       });
     }
 
-    const user = await prisma.user.findFirst({ where: { resetToken: token } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !user.isActive) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: 'Invalid or expired reset token',
+        message: "Invalid credentials or user inactive",
+      });
+    }
+
+    const isPasswordValid = await comparePassword(oldPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
       });
     }
 

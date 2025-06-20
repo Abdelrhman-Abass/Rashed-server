@@ -374,13 +374,22 @@ export const sendMessage = async (req, res) => {
     
     // Save the user's message
     const userMessage = await prisma.message.create({
-      data: {
+      data: messageType == "FILE" ?{
         sessionId,
         userId,
         content: messageContent,
         isFromBot: false,
         type: messageType,
         metadata: messageMetadata,
+        isRead: true,
+      }: {
+        sessionId,
+        userId,
+        content: messageContent,
+        isFromBot: false,
+        type: messageType,
+        metadata: messageMetadata,
+        fileName:fileName,
         isRead: true,
       },
     });
@@ -408,12 +417,20 @@ export const sendMessage = async (req, res) => {
 
     // Save the bot's response as a message
     const botMessage = await prisma.message.create({
-      data: {
+      data: messageType == "FILE" ? {
         sessionId,
         userId,
         content: botResponseContent,
         isFromBot: true,
         type: 'TEXT', // Update this if the AI API can return non-text responses
+        isRead: false,
+      }:{
+        sessionId,
+        userId,
+        content: botResponseContent,
+        isFromBot: true,
+        type: 'TEXT', // Update this if the AI API can return non-text responses
+        fileName:fileName,
         isRead: false,
       },
     });
@@ -443,11 +460,11 @@ export const sendMessage = async (req, res) => {
         ? {
             userMessage: { id: userMessage.id, content: userMessage.content, createdAt: userMessage.createdAt },
             botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt },
-            ...(fileName !== undefined ? { fileName } : {})
+            ...(fileName !== undefined ? { fileName : botMessage.fileName } : {})
           }
         : {
             botMessage: { id: botMessage.id, content: botMessage.content, createdAt: botMessage.createdAt },
-            ...(fileName !== undefined ? { fileName } : {})
+            ...(fileName !== undefined ? { fileName : botMessage.fileName } : {})
           }
     });
   } catch (error) {
