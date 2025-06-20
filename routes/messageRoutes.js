@@ -365,6 +365,43 @@ router.put('/:sessionId/end', authenticateToken, endChatSession);
 
 /**
  * @swagger
+ * /messages/delete-session/{sessionId}:
+ *   delete:
+ *     summary: Delete a chat session and its messages
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the chat session
+ *     responses:
+ *       200:
+ *         description: Chat session deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: null
+ *       404:
+ *         description: Chat session not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.delete('/delete-session/:sessionId', authenticateToken, deleteChatSession);
+/**
+ * @swagger
  * /messages/{sessionId}/{messageId}:
  *   delete:
  *     summary: Delete a specific message
@@ -407,43 +444,6 @@ router.put('/:sessionId/end', authenticateToken, endChatSession);
  */
 router.delete('/:sessionId/:messageId', authenticateToken, deleteMessage);
 
-/**
- * @swagger
- * /messages/delete-session/{sessionId}:
- *   delete:
- *     summary: Delete a chat session and its messages
- *     tags: [Messages]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: sessionId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the chat session
- *     responses:
- *       200:
- *         description: Chat session deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: null
- *       404:
- *         description: Chat session not found
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Internal server error
- */
-router.delete('/delete-session/:sessionId', authenticateToken, deleteChatSession);
 
 /**
  * @swagger
