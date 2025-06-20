@@ -521,6 +521,7 @@ export const getMessages = async (req, res) => {
         type: true,
         metadata: true,
         createdAt: true,
+        fileName: true, 
       },
     });
 

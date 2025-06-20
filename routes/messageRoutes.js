@@ -243,6 +243,8 @@ router.post('/send-message/:sessionId', authenticateToken, sendMessage);
  *                         type: boolean
  *                       type:
  *                         type: string
+ *                       fileName:
+ *                         type: string
  *                       metadata:
  *                         type: object
  *                       createdAt:
