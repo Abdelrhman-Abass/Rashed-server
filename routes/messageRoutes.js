@@ -1,54 +1,70 @@
-// import express from 'express';
 import { authenticateToken } from '../middleware/authMiddleware.js';
-// import {
-//   startChatSession,
-//   sendMessage,
-//   getMessages,
-//   endChatSession,
-//   getChatSessions,
-// } from '../controllers/messageController.js';
-
-// const router = express.Router();
-
-// // Start a new chat session
-// router.post('/session', authenticateToken, startChatSession);
-
-// // Send a message in a chat session (user message + bot response)
-// router.post('/:sessionId', authenticateToken, sendMessage);
-
-// // Get all messages in a chat session
-// router.get('/:sessionId', authenticateToken, getMessages);
-
-// // End a chat session
-// router.patch('/session/:sessionId/end', authenticateToken, endChatSession);
-// router.get('/', authenticateToken, getChatSessions); // Add this
-
-// import { Router } from 'express';
-// import { startChatSession, sendMessage, getMessages, endChatSession, getChatSessionInfo, renameChatSession ,deleteMessage, deleteChatSession } from '../controllers/messageController.js';
-// import multer from 'multer';
-
-// const router = Router();
-// // const upload = multer({ dest: 'uploads/' }); // Configure multer for file uploads
-
-// router.post('/session', authenticateToken, startChatSession);
-// router.post('/send-message/:sessionId', authenticateToken, sendMessage);
-// router.get('/get-message/:sessionId', authenticateToken, getMessages);
-// router.get('/chat-session-info/:sessionId', authenticateToken, getChatSessionInfo);
-// router.put('/:sessionId/end', authenticateToken, endChatSession);
-// // router.get('/get-sessions', authenticateToken, getChatSessions);
-// router.delete('/:sessionId/:messageId', authenticateToken, deleteMessage);
-// router.delete('/delete-session/:sessionId', authenticateToken, deleteChatSession);
-// router.patch('/rename-session/:sessionId', authenticateToken, renameChatSession);
-
-// export default router;
 
 
 import { Router } from 'express';
 import { startChatSession, sendMessage, getMessages, endChatSession, getChatSessionInfo, renameChatSession, deleteMessage, deleteChatSession } from '../controllers/messageController.js';
-import multer from 'multer';
 
 const router = Router();
 // const upload = multer({ dest: 'uploads/' }); // Configure multer for file uploads
+import multer from 'multer';
+import { readFileSync, unlinkSync } from 'fs';
+import PDFParser from 'pdf2json';
+
+
+const upload = multer({ dest: 'uploads/' });
+
+router.post('/api/upload/:sessionId', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    const sessionId = req.params.sessionId;
+    const filePath = req.file.path;
+    const fileName = req.file.originalname;
+
+    if (req.file.mimetype !== 'application/pdf') {
+      unlinkSync(filePath);
+      return res.status(400).json({ success: false, message: 'Only PDF files are allowed' });
+    }
+
+    // Parse PDF using pdf2json
+    const pdfParser = new PDFParser();
+    pdfParser.on('pdfParser_dataError', (errData) => {
+      console.error('PDF Parsing Error:', errData.parserError);
+      res.status(500).json({ success: false, message: 'Failed to process PDF' });
+    });
+    pdfParser.on('pdfParser_dataReady', (pdfData) => {
+      // Extract text (simplified, adjust based on needs)
+      let text = '';
+      for (const page of pdfData.Pages) {
+        for (const field of page.Texts) {
+          text += decodeURIComponent(field.R[0].T) + ' ';
+        }
+      }
+
+      unlinkSync(filePath); // Clean up
+
+      console.log('Extracted PDF Content:', text);
+
+      res.json({
+        success: true,
+        type: 'FILE',
+        data: {
+          fileName,
+          text,
+          sessionId,
+        },
+      });
+    });
+
+    pdfParser.loadPDF(filePath);
+  } catch (error) {
+    console.error('Error processing PDF:', error);
+    if (req.file?.path) unlinkSync(req.file.path); // Clean up on error
+    res.status(500).json({ success: false, message: 'Failed to process PDF' });
+  }
+});
 
 /**
  * @swagger
